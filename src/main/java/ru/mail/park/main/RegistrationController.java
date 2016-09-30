@@ -12,6 +12,7 @@ import ru.mail.park.services.SessionService;
 import javax.servlet.http.HttpSession;
 import java.util.concurrent.atomic.AtomicLong;
 
+@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1:3000"})
 @RestController
 @SuppressWarnings("unused")
 public class RegistrationController {
@@ -40,7 +41,6 @@ public class RegistrationController {
     }
 
     @RequestMapping(path = "/api/session", method = RequestMethod.POST)
-    @CrossOrigin(origins = "http://127.0.0.1:3000")
     public ResponseEntity auth(@RequestBody AuthenticationRequest body,
                                HttpSession httpSession) {
 
@@ -81,7 +81,6 @@ public class RegistrationController {
     }
 
     @RequestMapping(path = "/api/user", method = RequestMethod.POST)
-    @CrossOrigin(origins = "http://127.0.0.1:3000")
     public ResponseEntity register(@RequestBody RegistrationRequest body,
                                    HttpSession httpSession) {
         final String sessionId = httpSession.getId();
