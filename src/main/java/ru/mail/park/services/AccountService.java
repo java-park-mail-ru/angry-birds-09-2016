@@ -19,4 +19,13 @@ public class AccountService {
     public UserProfile getUser(String login) {
         return userNameToUser.get(login);
     }
+
+    public UserProfile getUser(int id) {
+        for (Map.Entry<String, UserProfile> entry : userNameToUser.entrySet()) {
+            UserProfile user = entry.getValue();
+            if (user.getId() == id) return user;
+        }
+
+        return null;
+    }
 }

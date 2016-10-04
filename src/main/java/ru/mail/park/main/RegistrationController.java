@@ -1,5 +1,6 @@
 package ru.mail.park.main;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import ru.mail.park.services.SessionService;
 import javax.servlet.http.HttpSession;
 import java.util.concurrent.atomic.AtomicLong;
 
-@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1:3000"})
+@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1"})
 @RestController
 @SuppressWarnings("unused")
 public class RegistrationController {
@@ -36,7 +37,7 @@ public class RegistrationController {
             return ResponseEntity.ok().body("{\"id\":" + userProfile.getId() + '}');
         }
 
-        Long size = sessionService.getLength();
+        final Long size = sessionService.getLength();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(httpSession.getId());
     }
 
@@ -102,6 +103,29 @@ public class RegistrationController {
 
         accountService.addUser(ID_GENETATOR.getAndIncrement(), login, password, email);
         return ResponseEntity.ok(new SuccessResponse(ID_GENETATOR.get() - 1));
+    }
+
+    @RequestMapping(path = "api/user/{id}", method = RequestMethod.GET)
+    public ResponseEntity getUser(@PathVariable("id") int id) {
+        UserProfile user = accountService.getUser(id);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+        }
+
+        return ResponseEntity.ok(user.getUserInfoJSON());
+    }
+
+    @RequestMapping(path = "api/user/{id}", method = RequestMethod.PUT)
+    public ResponseEntity editUser(@PathVariable("id") int id) {
+        // TODO: Implement it
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+    }
+
+    @RequestMapping(path = "api/user/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteUser(@PathVariable("id") int id) {
+        // TODO: Implement it
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
     }
 
     @SuppressWarnings("unused")
