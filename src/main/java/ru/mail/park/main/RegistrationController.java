@@ -1,6 +1,5 @@
 package ru.mail.park.main;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,7 @@ import static org.springframework.http.ResponseEntity.status;
 
 @CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1"})
 @RestController
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "MVCPathVariableInspection"})
 public class RegistrationController {
 
     private final AccountService accountService;
@@ -109,7 +108,7 @@ public class RegistrationController {
 
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.GET)
     public ResponseEntity getUser(@PathVariable("id") int id) {
-        UserProfile user = accountService.getUser(id);
+        final UserProfile user = accountService.getUser(id);
 
         if (user == null) {
             return status(HttpStatus.BAD_REQUEST).body("{}");
@@ -129,7 +128,7 @@ public class RegistrationController {
 
         final UserProfile userExisting = sessionService.getUserBySessionId(httpSession.getId());
 
-        if (userExisting == user){
+        if (userExisting.equals(user)){
             return ResponseEntity.ok("{\"id\":" + user.getId() + '}');
         }
 
@@ -147,7 +146,7 @@ public class RegistrationController {
 
         final UserProfile userExisting = sessionService.getUserBySessionId(httpSession.getId());
 
-        if (userExisting != user){
+        if (!userExisting.equals(user)){
             return status(HttpStatus.BAD_REQUEST).body("{\"status\": " + HttpStatus.BAD_REQUEST + ", \"message\": \"Чужой юзер\"" + '}');
         }
 

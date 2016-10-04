@@ -1,7 +1,6 @@
 package ru.mail.park.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+@SuppressWarnings("unused")
 public class UserProfile {
     private String login;
     private String password;
@@ -32,12 +31,7 @@ public class UserProfile {
     }
 
     public String getUserInfoJSON() {
-        StringBuilder jsonString = new StringBuilder();
-
-        jsonString.append("{\"login\": " + "\"" + login + "\",");
-        jsonString.append("\"email\": " + "\"" + email + "\"}");
-
-        return jsonString.toString();
+        return "{\"login\": " + '\"' + login + "\"," + "\"email\": " + '\"' + email + "\"}";
     }
 
     public void setLogin(String login) {
