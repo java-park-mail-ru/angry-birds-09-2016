@@ -28,4 +28,8 @@ public class AccountService {
 
         return null;
     }
+
+    public void deleteUser(UserProfile user) {
+        userNameToUser.remove(user.getLogin());
+    }
 }

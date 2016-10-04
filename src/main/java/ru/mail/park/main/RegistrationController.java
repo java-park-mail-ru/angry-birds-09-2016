@@ -13,6 +13,8 @@ import ru.mail.park.services.SessionService;
 import javax.servlet.http.HttpSession;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.springframework.http.ResponseEntity.status;
+
 @CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1"})
 @RestController
 @SuppressWarnings("unused")
@@ -38,7 +40,7 @@ public class RegistrationController {
         }
 
         final Long size = sessionService.getLength();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(httpSession.getId());
+        return status(HttpStatus.UNAUTHORIZED).body(httpSession.getId());
     }
 
     @RequestMapping(path = "/api/session", method = RequestMethod.POST)
@@ -49,13 +51,13 @@ public class RegistrationController {
         final String password = body.getPassword();
         if (StringUtils.isEmpty(login)
                 || StringUtils.isEmpty(password)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+            return status(HttpStatus.BAD_REQUEST).body("{}");
         }
 
         final UserProfile user = accountService.getUser(login);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+            return status(HttpStatus.BAD_REQUEST).body("{}");
         }
 
         if(user.getPassword().equals(password)) {
@@ -63,7 +65,7 @@ public class RegistrationController {
             return ResponseEntity.ok(new SuccessResponse(user.getId()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(user.getPassword());
+        return status(HttpStatus.BAD_REQUEST).body(user.getPassword());
     }
 
     @RequestMapping(path = "/api/session", method = RequestMethod.DELETE)
@@ -73,7 +75,7 @@ public class RegistrationController {
         final UserProfile userProfile = sessionService.getUserBySessionId(sessionId);
 
         if (userProfile == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+            return status(HttpStatus.BAD_REQUEST).body("{}");
         }
 
         sessionService.endSession(sessionId);
@@ -92,13 +94,13 @@ public class RegistrationController {
         if (StringUtils.isEmpty(login)
                 || StringUtils.isEmpty(password)
                 || StringUtils.isEmpty(email)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+            return status(HttpStatus.BAD_REQUEST).body("{}");
         }
 
         final UserProfile existingUser = accountService.getUser(login);
 
         if (existingUser != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+            return status(HttpStatus.BAD_REQUEST).body("{}");
         }
 
         accountService.addUser(ID_GENETATOR.getAndIncrement(), login, password, email);
@@ -110,22 +112,47 @@ public class RegistrationController {
         UserProfile user = accountService.getUser(id);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+            return status(HttpStatus.BAD_REQUEST).body("{}");
         }
 
         return ResponseEntity.ok(user.getUserInfoJSON());
     }
 
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.PUT)
-    public ResponseEntity editUser(@PathVariable("id") int id) {
-        // TODO: Implement it
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+    public ResponseEntity editUser(@PathVariable("id") int id, HttpSession httpSession) {
+
+        final UserProfile user = accountService.getUser(id);
+
+        if (user == null) {
+            return status(HttpStatus.BAD_REQUEST).body("{}");
+        }
+
+        final UserProfile userExisting = sessionService.getUserBySessionId(httpSession.getId());
+
+        if (userExisting == user){
+            return ResponseEntity.ok("{\"id\":" + user.getId() + '}');
+        }
+
+        return status(HttpStatus.BAD_REQUEST).body("{\"status\": " + HttpStatus.BAD_REQUEST + ", \"message\": \"Чужой юзер\"" + '}');
     }
 
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity deleteUser(@PathVariable("id") int id) {
-        // TODO: Implement it
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{}");
+    public ResponseEntity deleteUser(@PathVariable("id") int id, HttpSession httpSession) {
+
+        final UserProfile user = accountService.getUser(id);
+
+        if (user == null) {
+            return status(HttpStatus.BAD_REQUEST).body("{}");
+        }
+
+        final UserProfile userExisting = sessionService.getUserBySessionId(httpSession.getId());
+
+        if (userExisting != user){
+            return status(HttpStatus.BAD_REQUEST).body("{\"status\": " + HttpStatus.BAD_REQUEST + ", \"message\": \"Чужой юзер\"" + '}');
+        }
+
+        accountService.deleteUser(user);
+        return ResponseEntity.ok("{}");
     }
 
     @SuppressWarnings("unused")
