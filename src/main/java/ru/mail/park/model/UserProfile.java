@@ -1,5 +1,9 @@
 package ru.mail.park.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @SuppressWarnings("unused")
 public class UserProfile {
     private String login;
@@ -18,6 +22,7 @@ public class UserProfile {
         return login;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
@@ -30,8 +35,16 @@ public class UserProfile {
         return id;
     }
 
-    public String getUserInfoJSON() {
-        return "{\"login\": " + '\"' + login + "\"," + "\"email\": " + '\"' + email + "\"}";
+    public String toJSON() {
+        String json;
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            json = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            json = "{}";
+        }
+
+        return json;
     }
 
     public void setLogin(String login) {

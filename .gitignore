@@ -21,6 +21,7 @@ tp_java_new.xml
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+Server.iml
 
 # Mongo Explorer plugin:
 .idea/mongoSettings.xml
