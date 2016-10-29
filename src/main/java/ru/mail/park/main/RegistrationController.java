@@ -1,5 +1,9 @@
 package ru.mail.park.main;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +18,11 @@ import ru.mail.park.services.SessionService;
 
 import javax.servlet.http.HttpSession;
 
+import java.util.ArrayList;
+
 import static org.springframework.http.ResponseEntity.status;
 
-@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1"})
+@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1:3000"})
 @RestController
 @SuppressWarnings({"unused", "MVCPathVariableInspection"})
 public class RegistrationController {
@@ -162,5 +168,33 @@ public class RegistrationController {
 
         accountService.deleteUser(user);
         return ResponseEntity.ok("{}");
+    }
+
+    @RequestMapping(path = "/api/userlist", method = RequestMethod.GET)
+    public ResponseEntity getUserList(HttpSession httpSession) {
+        final String sessionId = httpSession.getId();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode response = mapper.createObjectNode();
+
+        ArrayNode userJsonList = mapper.createArrayNode();
+
+        ArrayList<UserProfile> userList = accountService.getAllUsers();
+
+        for (int i = 0; i < userList.size(); i++) {
+            ObjectNode entry = mapper.createObjectNode();
+            entry.put("login", userList.get(i).getEmail());
+            entry.put("score", userList.get(i).getId());
+            userJsonList.add(entry);
+        }
+
+        response.set("userList", userJsonList);
+
+        try {
+            return ResponseEntity.ok().body(mapper.writeValueAsString(response));
+        } catch (JsonProcessingException ex) {
+            return ResponseEntity.ok().body("{}");
+        }
     }
 }

@@ -3,6 +3,7 @@ package ru.mail.park.services;
 import org.springframework.stereotype.Service;
 import ru.mail.park.model.UserProfile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,6 +31,14 @@ public class AccountService {
         }
 
         return null;
+    }
+
+    public ArrayList<UserProfile> getAllUsers() {
+        final ArrayList<UserProfile> userList = new ArrayList<>();
+        for (Map.Entry<String, UserProfile> entry : userNameToUser.entrySet()) {
+            userList.add(entry.getValue());
+        }
+        return userList;
     }
 
     public void deleteUser(UserProfile user) {
