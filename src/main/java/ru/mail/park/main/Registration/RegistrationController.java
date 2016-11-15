@@ -1,4 +1,4 @@
-package ru.mail.park.main;
+package ru.mail.park.main.Registration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,16 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.mail.park.database.entities.User;
-import ru.mail.park.main.requests.AuthenticationRequest;
-import ru.mail.park.main.requests.RegistrationRequest;
-import ru.mail.park.main.responses.SuccessResponse;
-import ru.mail.park.models.UserProfile;
 import ru.mail.park.services.AccountService;
 import ru.mail.park.services.SessionService;
 
 import javax.servlet.http.HttpSession;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.status;
@@ -59,13 +54,15 @@ public class RegistrationController {
         final String password = body.getPassword();
         if (StringUtils.isEmpty(login)
                 || StringUtils.isEmpty(password)) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Login or(and) password are empty\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.EMPTY_FIELDS));
         }
 
         final User user = accountService.getUser(login);
 
         if (user == null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong login\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.WRONG_LOGIN_PASSWORD));
         }
 
         if(user.matchPassword(password)) {
@@ -73,7 +70,8 @@ public class RegistrationController {
             return ResponseEntity.ok(new SuccessResponse(user.getUserId()));
         }
 
-        return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong password\"}");
+        return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                RegistrationErrors.WRONG_LOGIN_PASSWORD));
     }
 
     @RequestMapping(path = "/api/session", method = RequestMethod.DELETE)
@@ -83,7 +81,8 @@ public class RegistrationController {
         final User user = sessionService.getUserBySessionId(sessionId);
 
         if (user == null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"User is not authenticated\"}");
+            return status(HttpStatus.UNAUTHORIZED).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.ACCESS_DENIED));
         }
 
         sessionService.endSession(sessionId);
@@ -102,7 +101,8 @@ public class RegistrationController {
         if (StringUtils.isEmpty(login)
                 || StringUtils.isEmpty(password)
                 || StringUtils.isEmpty(email)) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Fields cannot be empty\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.EMPTY_FIELDS));
         }
 
         final User user = new User(login, email, password);
@@ -110,7 +110,8 @@ public class RegistrationController {
         final User existingUser = accountService.getUser(login);
 
         if (existingUser != null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"User already exists\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.EXISTING_USER));
         }
 
         final long id = accountService.addUser(user).getUserId();
@@ -122,7 +123,8 @@ public class RegistrationController {
         final User user = accountService.getUser(id);
 
         if (user == null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong id\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.WRONG_ID));
         }
 
         return ResponseEntity.ok(user.toJSON());
@@ -136,13 +138,15 @@ public class RegistrationController {
         final User user = accountService.getUser(id);
 
         if (user == null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong id\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.WRONG_ID));
         }
 
         final User currentUser = sessionService.getUserBySessionId(httpSession.getId());
 
         if (currentUser == null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"User is not authenticated\"}");
+            return status(HttpStatus.UNAUTHORIZED).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.ACCESS_DENIED));
         }
 
         if (currentUser.equals(user)){
@@ -152,7 +156,8 @@ public class RegistrationController {
             return ResponseEntity.ok("{\"id\":" + user.getUserId() + '}');
         }
 
-        return status(HttpStatus.BAD_REQUEST).body("{\"status\": 403, \"message\": \"Access denied\"}");
+        return status(HttpStatus.UNAUTHORIZED).body(RegistrationErrors.getErrorMessage(
+                RegistrationErrors.ACCESS_DENIED));
     }
 
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.DELETE)
@@ -161,16 +166,18 @@ public class RegistrationController {
         final User user = accountService.getUser(id);
 
         if (user == null) {
-            return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong id\"}");
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.WRONG_ID));
         }
 
         final User existingUser = sessionService.getUserBySessionId(httpSession.getId());
 
         if (!existingUser.equals(user)){
-            return status(HttpStatus.BAD_REQUEST).body("{\"status\": 403, \"message\": \"Access denied\"}");
+            return status(HttpStatus.UNAUTHORIZED).body(RegistrationErrors.getErrorMessage(
+                    RegistrationErrors.ACCESS_DENIED));
         }
 
-        //accountService.deleteUser(user); Needs to be implemented
+        accountService.deleteUser(user);
         return ResponseEntity.ok("{}");
     }
 

@@ -3,7 +3,6 @@ package ru.mail.park.services;
 import org.springframework.stereotype.Service;
 import ru.mail.park.database.dao.UserDAO;
 import ru.mail.park.database.entities.User;
-import ru.mail.park.models.UserProfile;
 
 import java.util.List;
 

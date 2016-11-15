@@ -1,4 +1,4 @@
-package ru.mail.park.main.requests;
+package ru.mail.park.main.Registration;
 
 @SuppressWarnings("unused")
 public final class AuthenticationRequest {

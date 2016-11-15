@@ -49,7 +49,7 @@ public class User {
 
     public boolean matchPassword(String plainPassword) {
         final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        return encoder.matches(encoder.encode(plainPassword), password);
+        return encoder.matches(plainPassword, password);
     }
 
     public void setUserId(Integer userId) {
