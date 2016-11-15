@@ -19,10 +19,12 @@ public class UserDAO {
 
         final Query query = session.createQuery("from User user where user.login = :login");
 
+        final User user = (User) query.setParameter("login", parameter).uniqueResult();
+
         transaction.commit();
         session.close();
 
-        return (User) query.setParameter("login", parameter).uniqueResult();
+        return user;
     }
 
     public void addUser(User user) {
