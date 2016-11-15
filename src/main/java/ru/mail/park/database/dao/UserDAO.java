@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by farid on 14.11.16.
  */
-@SuppressWarnings("JpaQlInspection")
+@SuppressWarnings({"JpaQlInspection", "unchecked"})
 public class UserDAO {
     public <T> User getUser(T parameter) {
         final Session session = HibernateUtils.getSessionFactory().openSession();
@@ -35,5 +35,17 @@ public class UserDAO {
 
         transaction.commit();
         session.close();
+    }
+
+    public List<User> getUserList() {
+        final Session session = HibernateUtils.getSessionFactory().openSession();
+        final Transaction transaction = session.beginTransaction();
+
+        final List users = session.createQuery("from User user").list();
+
+        transaction.commit();
+        session.close();
+
+        return users;
     }
 }

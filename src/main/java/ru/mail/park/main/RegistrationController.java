@@ -20,6 +20,7 @@ import ru.mail.park.services.SessionService;
 import javax.servlet.http.HttpSession;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.http.ResponseEntity.status;
 
@@ -183,7 +184,7 @@ public class RegistrationController {
 
         final ArrayNode userJsonList = mapper.createArrayNode();
 
-        final ArrayList<User> userList = accountService.getAllUsers();
+        final List<User> userList = accountService.getAllUsers();
 
         for (int i = 0; i < userList.size(); i++) {
             final ObjectNode entry = mapper.createObjectNode();

@@ -5,10 +5,7 @@ import ru.mail.park.database.dao.UserDAO;
 import ru.mail.park.database.entities.User;
 import ru.mail.park.models.UserProfile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 
 @Service
 public class AccountService {
@@ -21,18 +18,17 @@ public class AccountService {
 
     public User getUser(String login) {
         final UserDAO userDAO = new UserDAO();
-        final User user = userDAO.getUser(login);
-        return user;
+        return userDAO.getUser(login);
     }
 
     public User getUser(int userId) {
         final UserDAO userDAO = new UserDAO();
-        final User user = userDAO.getUser(userId);
-        return user;
+        return userDAO.getUser(userId);
     }
 
-    public ArrayList<User> getAllUsers() {
-        return null;
+    public List<User> getAllUsers() {
+        final UserDAO userDAO = new UserDAO();
+        return userDAO.getUserList();
     }
 
     public void deleteUser(UserProfile user) {
