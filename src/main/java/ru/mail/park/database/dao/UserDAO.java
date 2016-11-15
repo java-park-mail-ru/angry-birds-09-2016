@@ -13,13 +13,13 @@ import java.util.List;
  */
 @SuppressWarnings({"JpaQlInspection", "unchecked"})
 public class UserDAO {
-    public <T> User getUser(T parameter) {
+    public <T> User getUser(T parameter, String parameterName) {
         final Session session = HibernateUtils.getSessionFactory().openSession();
         final Transaction transaction = session.beginTransaction();
 
-        final Query query = session.createQuery("from User user where user.login = :login");
+        final Query query = session.createQuery("from User user where user." + parameterName + " = :" + parameterName);
 
-        final User user = (User) query.setParameter("login", parameter).uniqueResult();
+        final User user = (User) query.setParameter(parameterName, parameter).uniqueResult();
 
         transaction.commit();
         session.close();
@@ -47,5 +47,15 @@ public class UserDAO {
         session.close();
 
         return users;
+    }
+
+    public void deleteUser(User user) {
+        final Session session = HibernateUtils.getSessionFactory().openSession();
+        final Transaction transaction = session.beginTransaction();
+
+        session.delete(user);
+
+        transaction.commit();
+        session.close();
     }
 }

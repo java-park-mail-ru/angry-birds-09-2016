@@ -13,16 +13,16 @@
 
         <!-- Assume test is the database name -->
         <property name="hibernate.connection.url">
-            jdbc:mysql://localhost:3306/test
+            jdbc:mysql://us-cdbr-iron-east-04.cleardb.net/heroku_5e754667688fa3a
         </property>
         <property name="hibernate.hbm2ddl.auto">
             update
         </property>
         <property name="hibernate.connection.username">
-            root
+            bf04c08bb60517
         </property>
         <property name="hibernate.connection.password">
-            20101995
+            e50d1191
         </property>
 
         <mapping class="ru.mail.park.database.entities.User"/>

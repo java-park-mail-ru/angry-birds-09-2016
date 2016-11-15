@@ -39,7 +39,7 @@ public class RegistrationController {
     }
 
     @RequestMapping(path="/api/session", method = RequestMethod.GET)
-    public ResponseEntity isAuthenticated(HttpSession httpSession) {//JESSIONID is always changing
+    public ResponseEntity isAuthenticated(HttpSession httpSession) {
         final String sessionId = httpSession.getId();
         final User user = sessionService.getUserBySessionId(sessionId);
 

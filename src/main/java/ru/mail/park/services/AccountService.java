@@ -18,12 +18,12 @@ public class AccountService {
 
     public User getUser(String login) {
         final UserDAO userDAO = new UserDAO();
-        return userDAO.getUser(login);
+        return userDAO.getUser(login, "login");
     }
 
     public User getUser(int userId) {
         final UserDAO userDAO = new UserDAO();
-        return userDAO.getUser(userId);
+        return userDAO.getUser(userId, "userId");
     }
 
     public List<User> getAllUsers() {
@@ -31,7 +31,8 @@ public class AccountService {
         return userDAO.getUserList();
     }
 
-    public void deleteUser(UserProfile user) {
-
+    public void deleteUser(User user) {
+        final UserDAO userDAO = new UserDAO();
+        userDAO.deleteUser(user);
     }
 }
