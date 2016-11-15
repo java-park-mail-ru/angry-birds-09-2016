@@ -9,10 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import ru.mail.park.database.entities.User;
 import ru.mail.park.main.requests.AuthenticationRequest;
 import ru.mail.park.main.requests.RegistrationRequest;
 import ru.mail.park.main.responses.SuccessResponse;
-import ru.mail.park.model.UserProfile;
+import ru.mail.park.models.UserProfile;
 import ru.mail.park.services.AccountService;
 import ru.mail.park.services.SessionService;
 
@@ -39,10 +40,10 @@ public class RegistrationController {
     @RequestMapping(path="/api/session", method = RequestMethod.GET)
     public ResponseEntity isAuthenticated(HttpSession httpSession) {//JESSIONID is always changing
         final String sessionId = httpSession.getId();
-        final UserProfile userProfile = sessionService.getUserBySessionId(sessionId);
+        final User user = sessionService.getUserBySessionId(sessionId);
 
-        if(userProfile != null) {
-            return ResponseEntity.ok().body("{\"id\":" + userProfile.getId() + '}');
+        if(user != null) {
+            return ResponseEntity.ok().body("{\"id\":" + user.getUserId() + '}');
         }
 
         final Long size = sessionService.getLength();
@@ -60,15 +61,15 @@ public class RegistrationController {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Login or(and) password are empty\"}");
         }
 
-        final UserProfile user = accountService.getUser(login);
+        final User user = accountService.getUser(login);
 
         if (user == null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong login\"}");
         }
 
-        if(user.getPassword().equals(password)) {
+        if(user.matchPassword(password)) {
             sessionService.addUserToSession(httpSession.getId(), user);
-            return ResponseEntity.ok(new SuccessResponse(user.getId()));
+            return ResponseEntity.ok(new SuccessResponse(user.getUserId()));
         }
 
         return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong password\"}");
@@ -78,9 +79,9 @@ public class RegistrationController {
     public ResponseEntity logout(HttpSession httpSession) {
 
         final String sessionId = httpSession.getId();
-        final UserProfile userProfile = sessionService.getUserBySessionId(sessionId);
+        final User user = sessionService.getUserBySessionId(sessionId);
 
-        if (userProfile == null) {
+        if (user == null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"User is not authenticated\"}");
         }
 
@@ -103,19 +104,21 @@ public class RegistrationController {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Fields cannot be empty\"}");
         }
 
-        final UserProfile existingUser = accountService.getUser(login);
+        final User user = new User(login, email, password);
+
+        final User existingUser = accountService.getUser(login);
 
         if (existingUser != null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"User already exists\"}");
         }
 
-        final long id = accountService.addUser(login, password, email).getId();
+        final long id = accountService.addUser(user).getUserId();
         return ResponseEntity.ok(new SuccessResponse(id));
     }
 
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.GET)
     public ResponseEntity getUser(@PathVariable("id") int id) {
-        final UserProfile user = accountService.getUser(id);
+        final User user = accountService.getUser(id);
 
         if (user == null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong id\"}");
@@ -129,13 +132,13 @@ public class RegistrationController {
                                    @RequestBody RegistrationRequest body,
                                    HttpSession httpSession) {
 
-        final UserProfile user = accountService.getUser(id);
+        final User user = accountService.getUser(id);
 
         if (user == null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong id\"}");
         }
 
-        final UserProfile currentUser = sessionService.getUserBySessionId(httpSession.getId());
+        final User currentUser = sessionService.getUserBySessionId(httpSession.getId());
 
         if (currentUser == null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"User is not authenticated\"}");
@@ -145,7 +148,7 @@ public class RegistrationController {
             user.setLogin(body.getLogin());
             user.setPassword(body.getPassword());
             user.setEmail(body.getEmail());
-            return ResponseEntity.ok("{\"id\":" + user.getId() + '}');
+            return ResponseEntity.ok("{\"id\":" + user.getUserId() + '}');
         }
 
         return status(HttpStatus.BAD_REQUEST).body("{\"status\": 403, \"message\": \"Access denied\"}");
@@ -154,19 +157,19 @@ public class RegistrationController {
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.DELETE)
     public ResponseEntity deleteUser(@PathVariable("id") int id, HttpSession httpSession) {
 
-        final UserProfile user = accountService.getUser(id);
+        final User user = accountService.getUser(id);
 
         if (user == null) {
             return status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Wrong id\"}");
         }
 
-        final UserProfile userExisting = sessionService.getUserBySessionId(httpSession.getId());
+        final User existingUser = sessionService.getUserBySessionId(httpSession.getId());
 
-        if (!userExisting.equals(user)){
+        if (!existingUser.equals(user)){
             return status(HttpStatus.BAD_REQUEST).body("{\"status\": 403, \"message\": \"Access denied\"}");
         }
 
-        accountService.deleteUser(user);
+        //accountService.deleteUser(user); Needs to be implemented
         return ResponseEntity.ok("{}");
     }
 
@@ -174,18 +177,18 @@ public class RegistrationController {
     public ResponseEntity getUserList(HttpSession httpSession) {
         final String sessionId = httpSession.getId();
 
-        ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = new ObjectMapper();
 
-        ObjectNode response = mapper.createObjectNode();
+        final ObjectNode response = mapper.createObjectNode();
 
-        ArrayNode userJsonList = mapper.createArrayNode();
+        final ArrayNode userJsonList = mapper.createArrayNode();
 
-        ArrayList<UserProfile> userList = accountService.getAllUsers();
+        final ArrayList<User> userList = accountService.getAllUsers();
 
         for (int i = 0; i < userList.size(); i++) {
-            ObjectNode entry = mapper.createObjectNode();
+            final ObjectNode entry = mapper.createObjectNode();
             entry.put("login", userList.get(i).getEmail());
-            entry.put("score", userList.get(i).getId());
+            entry.put("score", userList.get(i).getUserId());
             userJsonList.add(entry);
         }
 

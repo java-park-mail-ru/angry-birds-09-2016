@@ -1,4 +1,4 @@
-package ru.mail.park.model;
+package ru.mail.park.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
