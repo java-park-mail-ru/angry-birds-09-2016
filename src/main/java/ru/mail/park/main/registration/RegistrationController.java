@@ -1,4 +1,4 @@
-package ru.mail.park.main.Registration;
+package ru.mail.park.main.registration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

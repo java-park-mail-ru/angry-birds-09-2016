@@ -1,4 +1,4 @@
-package ru.mail.park.main.Registration;
+package ru.mail.park.main.registration;
 
 /**
  * Created by farid on 15.11.16.
@@ -13,7 +13,7 @@ public class RegistrationErrors {
     public static final int WRONG_ID = 6;
 
     public static String getErrorMessage(int code) {
-        String message = null;
+        final String message;
 
         switch (code) {
             case 0: message = "Everything is ok"; break;

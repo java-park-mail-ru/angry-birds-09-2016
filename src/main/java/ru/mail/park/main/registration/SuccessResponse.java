@@ -1,4 +1,4 @@
-package ru.mail.park.main.Registration;
+package ru.mail.park.main.registration;
 
 public final class SuccessResponse {
     private long id;
