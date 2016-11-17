@@ -33,6 +33,7 @@ public class User {
         this.email = email;
         final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         this.password = encoder.encode(password);
+        this.userId = 0;
     }
 
     public Integer getUserId() {

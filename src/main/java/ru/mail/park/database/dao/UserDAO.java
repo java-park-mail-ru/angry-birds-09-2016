@@ -13,6 +13,7 @@ import java.util.List;
  */
 @SuppressWarnings({"JpaQlInspection", "unchecked"})
 public class UserDAO {
+
     public <T> User getUser(T parameter, String parameterName) {
         final Session session = HibernateUtils.getSessionFactory().openSession();
         final Transaction transaction = session.beginTransaction();
