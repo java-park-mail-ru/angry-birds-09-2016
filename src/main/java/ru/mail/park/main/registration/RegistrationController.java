@@ -114,7 +114,7 @@ public class RegistrationController {
                     RegistrationErrors.EXISTING_USER));
         }
 
-        final long id = accountService.addUser(user).getUserId();
+        final Integer id = accountService.addUser(user).getUserId();
         return ResponseEntity.ok(new SuccessResponse(id));
     }
 
@@ -153,7 +153,7 @@ public class RegistrationController {
             user.setLogin(body.getLogin());
             user.setPassword(body.getPassword());
             user.setEmail(body.getEmail());
-            return ResponseEntity.ok("{\"id\":" + user.getUserId() + '}');
+            return ResponseEntity.ok(user.toJSON());
         }
 
         return status(HttpStatus.UNAUTHORIZED).body(RegistrationErrors.getErrorMessage(
@@ -187,23 +187,20 @@ public class RegistrationController {
 
         final ObjectMapper mapper = new ObjectMapper();
 
-        final ObjectNode response = mapper.createObjectNode();
-
         final ArrayNode userJsonList = mapper.createArrayNode();
 
         final List<User> userList = accountService.getAllUsers();
 
         for (int i = 0; i < userList.size(); i++) {
             final ObjectNode entry = mapper.createObjectNode();
-            entry.put("login", userList.get(i).getEmail());
+            entry.put("login", userList.get(i).getLogin());
+            entry.put("email", userList.get(i).getEmail());
             entry.put("score", userList.get(i).getUserId());
             userJsonList.add(entry);
         }
 
-        response.set("userList", userJsonList);
-
         try {
-            return ResponseEntity.ok().body(mapper.writeValueAsString(response));
+            return ResponseEntity.ok().body(mapper.writeValueAsString(userJsonList));
         } catch (JsonProcessingException ex) {
             return ResponseEntity.ok().body("{}");
         }
