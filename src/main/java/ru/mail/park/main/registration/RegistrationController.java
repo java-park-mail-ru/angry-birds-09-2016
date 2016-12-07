@@ -15,11 +15,12 @@ import ru.mail.park.services.SessionService;
 
 import javax.servlet.http.HttpSession;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.status;
 
-@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1:3000"})
+@CrossOrigin(origins = {"http://technoteam.herokuapp.com", "http://127.0.0.1:3000", "http://127.0.0.1:80", "*"})
 @RestController
 @SuppressWarnings({"unused", "MVCPathVariableInspection"})
 public class RegistrationController {
@@ -189,13 +190,13 @@ public class RegistrationController {
 
         final ArrayNode userJsonList = mapper.createArrayNode();
 
-        final List<User> userList = accountService.getAllUsers();
+        final ArrayList<User> userList = (ArrayList<User>) accountService.getAllUsers();
 
-        for (int i = 0; i < userList.size(); i++) {
+        for (User user : userList) {
             final ObjectNode entry = mapper.createObjectNode();
-            entry.put("login", userList.get(i).getLogin());
-            entry.put("email", userList.get(i).getEmail());
-            entry.put("score", userList.get(i).getUserId());
+            entry.put("login", user.getLogin());
+            entry.put("email", user.getEmail());
+            entry.put("score", user.getUserId());
             userJsonList.add(entry);
         }
 

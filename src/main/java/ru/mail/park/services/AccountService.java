@@ -1,37 +1,34 @@
 package ru.mail.park.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.mail.park.database.dao.UserDAO;
 import ru.mail.park.database.entities.User;
 
-import java.util.List;
-
 @Service
 public class AccountService {
 
+    @Autowired
+    private UserDAO userDAO;
+
     public User addUser(User user) {
-        final UserDAO userDAO = new UserDAO();
-        userDAO.addUser(user);
+        userDAO.save(user);
         return user;
     }
 
     public User getUser(String login) {
-        final UserDAO userDAO = new UserDAO();
-        return userDAO.getUser(login, "login");
+        return userDAO.findByLogin(login);
     }
 
     public User getUser(int userId) {
-        final UserDAO userDAO = new UserDAO();
-        return userDAO.getUser(userId, "userId");
+        return userDAO.findByUserId(userId);
     }
 
-    public List<User> getAllUsers() {
-        final UserDAO userDAO = new UserDAO();
-        return userDAO.getUserList();
+    public Iterable<User> getAllUsers() {
+        return userDAO.findAll();
     }
 
     public void deleteUser(User user) {
-        final UserDAO userDAO = new UserDAO();
-        userDAO.deleteUser(user);
+        userDAO.delete(user);
     }
 }
