@@ -19,11 +19,14 @@ public class User {
     @JsonProperty("id")
     private Integer userId;
 
+    @Column(unique = true)
     private String login;
 
+    @Column(unique = true)
     private String email;
 
     @JsonIgnore
+    @Column
     private String password;
 
     public User() {}

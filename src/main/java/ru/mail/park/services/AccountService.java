@@ -12,8 +12,7 @@ public class AccountService {
     private UserDAO userDAO;
 
     public User addUser(User user) {
-        userDAO.save(user);
-        return user;
+        return userDAO.save(user);
     }
 
     public User getUser(String login) {
