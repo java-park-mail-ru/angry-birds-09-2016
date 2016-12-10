@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -16,7 +17,6 @@ import ru.mail.park.services.SessionService;
 import javax.servlet.http.HttpSession;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.springframework.http.ResponseEntity.status;
 
@@ -68,7 +68,13 @@ public class RegistrationController {
 
         if(user.matchPassword(password)) {
             sessionService.addUserToSession(httpSession.getId(), user);
-            return ResponseEntity.ok(new SuccessResponse(user.getUserId()));
+
+            final ObjectMapper mapper = new ObjectMapper();
+            final ObjectNode response = mapper.createObjectNode();
+
+            response.put("id", user.getUserId());
+
+            return ResponseEntity.ok(response);
         }
 
         return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
@@ -94,11 +100,11 @@ public class RegistrationController {
     @RequestMapping(path = "/api/user", method = RequestMethod.POST)
     public ResponseEntity register(@RequestBody RegistrationRequest body,
                                    HttpSession httpSession) {
-        final String sessionId = httpSession.getId();
 
         final String login = body.getLogin();
         final String password = body.getPassword();
         final String email = body.getEmail();
+
         if (StringUtils.isEmpty(login)
                 || StringUtils.isEmpty(password)
                 || StringUtils.isEmpty(email)) {
@@ -106,17 +112,21 @@ public class RegistrationController {
                     RegistrationErrors.EMPTY_FIELDS));
         }
 
-        final User user = new User(login, email, password);
+        User user = new User(login, email, password);
 
-        final User existingUser = accountService.getUser(login);
+        user = accountService.addUser(user);
 
-        if (existingUser != null) {
-            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors.getErrorMessage(
-                    RegistrationErrors.EXISTING_USER));
+        if (user == null) {
+            return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors
+                    .getErrorMessage(RegistrationErrors.EXISTING_USER));
         }
 
-        final Integer id = accountService.addUser(user).getUserId();
-        return ResponseEntity.ok(new SuccessResponse(id));
+        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode response = mapper.createObjectNode();
+
+        response.put("id", user.getUserId());
+
+        return ResponseEntity.ok(response);
     }
 
     @RequestMapping(path = "api/user/{id}", method = RequestMethod.GET)
@@ -151,9 +161,18 @@ public class RegistrationController {
         }
 
         if (currentUser.equals(user)){
-            user.setLogin(body.getLogin());
-            user.setPassword(body.getPassword());
-            user.setEmail(body.getEmail());
+            if (body.getLogin() != null) user.setLogin(body.getLogin());
+            if (body.getPassword() != null) user.setPassword(body.getPassword());
+            if (body.getEmail() != null) user.setEmail(body.getEmail());
+
+            try {
+                accountService.updateUser(user);
+            } catch (DataIntegrityViolationException ex) {
+                ex.printStackTrace();
+                return status(HttpStatus.BAD_REQUEST).body(RegistrationErrors
+                        .getErrorMessage(RegistrationErrors.EXISTING_USER));
+            }
+
             return ResponseEntity.ok(user.toJSON());
         }
 

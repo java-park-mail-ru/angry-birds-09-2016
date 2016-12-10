@@ -84,4 +84,22 @@ public class User {
 
         return json;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (!User.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+
+        final User user = (User) obj;
+
+        return !(!this.login.equals(user.login) ||
+                !this.password.equals(user.password) ||
+                !this.email.equals(user.email));
+
+    }
 }
