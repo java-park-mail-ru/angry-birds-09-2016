@@ -90,6 +90,13 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <version>1.4.2.RELEASE</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-websocket -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>4.3.4.RELEASE</version>
+        </dependency>
+
     </dependencies>
 
     <build>
