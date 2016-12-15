@@ -1,24 +1,24 @@
 package ru.mail.park.services;
 
 import org.springframework.stereotype.Service;
-import ru.mail.park.model.UserProfile;
+import ru.mail.park.database.entities.User;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class SessionService {
-    private Map<String, UserProfile>  sessionIdToUser = new HashMap<>();
+    private Map<String, User>  sessionIdToUser = new HashMap<>();
 
-    public void addUserToSession (String sessionId, UserProfile userProfile) {
-        sessionIdToUser.put(sessionId, userProfile);
+    public void addUserToSession (String sessionId, User user) {
+        sessionIdToUser.put(sessionId, user);
     }
 
     public void endSession (String sessionId) {
         sessionIdToUser.remove(sessionId);
     }
 
-    public UserProfile getUserBySessionId(String sessionId) {
+    public User getUserBySessionId(String sessionId) {
         return sessionIdToUser.get(sessionId);
     }
 
