@@ -29,14 +29,6 @@ public class GameSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws AuthenticationException {
         lobby.getSessions().add(webSocketSession);
-
-        try {
-            for (WebSocketSession session : lobby.getSessions()) {
-                session.sendMessage(new TextMessage("Someone has entered the lobby " + webSocketSession.toString()));
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     @Override

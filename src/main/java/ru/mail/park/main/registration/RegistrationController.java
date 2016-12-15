@@ -40,7 +40,13 @@ public class RegistrationController {
         final User user = sessionService.getUserBySessionId(sessionId);
 
         if(user != null) {
-            return ResponseEntity.ok().body("{\"id\":" + user.getUserId() + '}');
+            final ObjectMapper mapper = new ObjectMapper();
+            final ObjectNode response = mapper.createObjectNode();
+
+            response.put("userId", user.getUserId());
+            response.put("login", user.getLogin());
+
+            return ResponseEntity.ok().body(response);
         }
 
         final Long size = sessionService.getLength();
