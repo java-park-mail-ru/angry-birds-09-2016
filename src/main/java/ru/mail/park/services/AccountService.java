@@ -1,38 +1,67 @@
 package ru.mail.park.services;
 
+import org.hibernate.HibernateException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import ru.mail.park.model.UserProfile;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import ru.mail.park.database.dao.UserDaoImpl;
+import ru.mail.park.database.entities.User;
 
 @Service
 public class AccountService {
-    private Map<String, UserProfile> userNameToUser = new HashMap<>();
-    private static final AtomicLong ID_GENETATOR = new AtomicLong(0);
+    @Autowired
+    UserDaoImpl userDao;
 
-    public UserProfile addUser(String login, String password, String email) {
-        final long id = ID_GENETATOR.getAndIncrement();
-        final UserProfile userProfile = new UserProfile(id, login, password, email);
-        userNameToUser.put(login, userProfile);
-        return userProfile;
-    }
-
-    public UserProfile getUser(String login) {
-        return userNameToUser.get(login);
-    }
-
-    public UserProfile getUser(int id) {
-        for (Map.Entry<String, UserProfile> entry : userNameToUser.entrySet()) {
-            final UserProfile user = entry.getValue();
-            if (user.getId() == id) return user;
+    public User addUser(User user) {
+        try {
+            return userDao.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            ex.printStackTrace();
+            return null;
         }
-
-        return null;
     }
 
-    public void deleteUser(UserProfile user) {
-        userNameToUser.remove(user.getLogin());
+    public User getUser(String login) {
+        try {
+            return userDao.findByLogin(login);
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public User getUser(int userId) {
+        try {
+            return userDao.findByUserId(userId);
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public Iterable<User> getAllUsers() {
+        try {
+            return userDao.findAll();
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public void updateUser(User user) throws DataIntegrityViolationException {
+        try {
+            userDao.update(user);
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void deleteUser(User user) {
+        try {
+            userDao.delete(user);
+        } catch (HibernateException ex) {
+            ex.printStackTrace();
+        }
     }
 }
